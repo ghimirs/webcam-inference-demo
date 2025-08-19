@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YOLO Realtime Inference</title>
+  <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+  <h1>Realtime YOLO Inference (Roboflow)</h1>
+
+  <!-- Webcam video -->
+  <video id="webcam" autoplay playsinline width="640" height="640"></video>
+  <!-- Canvas for drawing detections -->
+  <canvas id="overlay" width="640" height="640"></canvas>
+
+  <!-- Roboflow InferenceJS -->
+  <script src="https://cdn.jsdelivr.net/npm/inferencejs"></script>
+  <!-- Your main script -->
+  <script src="main.js"></script>
+</body>
+</html>
