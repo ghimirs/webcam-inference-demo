@@ -5,56 +5,66 @@ const publishableKey = "emo7MRpFvllZ85GMvn7t";
 const modelId = "pool_table_ball_pocket";     // e.g. "pool-balls"
 const version = "5";                   // your model version number
 
-let model;
-let video;
-let canvas, ctx;
+// main.js (no import version, works with Roboflow CDN)
 
-async function init() {
-  // Setup webcam
-  video = document.getElementById("webcam");
-  canvas = document.getElementById("overlay");
-  ctx = canvas.getContext("2d");
+const apiKey = "emo7MRpFvllZ85GMvn7t";   // <-- replace with your Roboflow Publishable Key
+const modelId = "pool_table_ball_pocket/5";  // <-- replace with your model + version (e.g., "pool-detect/3")
 
+// Setup video
+const video = document.createElement("video");
+video.autoplay = true;
+video.playsInline = true;
+video.style.display = "none"; // keep hidden, we’ll draw to canvas instead
+document.body.appendChild(video);
+
+// Setup canvas
+const canvas = document.createElement("canvas");
+canvas.width = 640;
+canvas.height = 640;
+document.body.appendChild(canvas);
+const ctx = canvas.getContext("2d");
+
+// Start webcam
+navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 640 } })
+  .then(stream => { video.srcObject = stream; })
+  .catch(err => console.error("Camera error:", err));
+
+async function run() {
   // Load model
-  const rf = new Roboflow({ apiKey: publishableKey });
-  model = await rf.load({ model: modelId, version });
+  const model = await window.roboflow
+    .auth({ publishable_key: apiKey })
+    .load({ model: modelId });
 
-  // Force video + canvas to 640x640
-  video.width = 640;
-  video.height = 640;
-  canvas.width = 640;
-  canvas.height = 640;
+  async function detectFrame() {
+    const predictions = await model.detect(video);
 
-  // Start prediction loop
-  requestAnimationFrame(predictFrame);
-}
+    // Draw video frame
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-async function predictFrame() {
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    // Run inference
-    const predictions = await model.detect(video, { 
-      maxSize: 640   // enforce model input size
-    });
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw boxes
+    // Draw predictions
     predictions.forEach(pred => {
-      const [x, y, w, h] = pred.bbox; // [centerX, centerY, width, height]
-
-      ctx.strokeStyle = "lime";
+      ctx.strokeStyle = "red";
       ctx.lineWidth = 2;
-      ctx.strokeRect(x - w/2, y - h/2, w, h);
+      ctx.strokeRect(
+        pred.bbox.x - pred.bbox.width / 2,
+        pred.bbox.y - pred.bbox.height / 2,
+        pred.bbox.width,
+        pred.bbox.height
+      );
 
-      ctx.fillStyle = "lime";
-      ctx.font = "14px Arial";
-      ctx.fillText(`${pred.class} (${(pred.confidence*100).toFixed(1)}%)`, x - w/2, y - h/2 - 5);
+      ctx.fillStyle = "red";
+      ctx.font = "16px Arial";
+      ctx.fillText(
+        `${pred.class} (${Math.round(pred.confidence * 100)}%)`,
+        pred.bbox.x - pred.bbox.width / 2,
+        pred.bbox.y - pred.bbox.height / 2 - 5
+      );
     });
+
+    requestAnimationFrame(detectFrame);
   }
 
-  // Keep looping
-  requestAnimationFrame(predictFrame);
+  detectFrame();
 }
 
-window.onload = init;
+run();
