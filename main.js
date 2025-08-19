@@ -1,9 +1,9 @@
 import { Roboflow } from "@roboflow/inference";
 
 // Replace these with your Roboflow project details
-const publishableKey = "YOUR_ROBOFLOW_PUBLISHABLE_KEY";
-const modelId = "your-project-id";     // e.g. "pool-balls"
-const version = "1";                   // your model version number
+const publishableKey = "emo7MRpFvllZ85GMvn7t";
+const modelId = "pool_table_ball_pocket";     // e.g. "pool-balls"
+const version = "5";                   // your model version number
 
 let model;
 let video;
