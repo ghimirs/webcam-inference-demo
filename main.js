@@ -1,4 +1,4 @@
-import { Roboflow } from "@roboflow/inference";
+import * as roboflow from "https://cdn.roboflow.com/inference/inference.js";
 
 // Replace these with your Roboflow project details
 const publishableKey = "emo7MRpFvllZ85GMvn7t";
